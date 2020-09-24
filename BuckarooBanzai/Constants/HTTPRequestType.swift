@@ -9,10 +9,10 @@ import Foundation
 
 public enum HTTPRequestType
 {
-    case GET(_: String = "GET")
-    case POST(_: String = "POST")
-    case PUT(_: String = "PUT")
-    case DELETE(_: String = "DELETE")
-    case HEAD(_: String = "HEAD")
+    case GET
+    case POST
+    case PUT
+    case DELETE
+    case HEAD
     case CUSTOM(String)
 }
