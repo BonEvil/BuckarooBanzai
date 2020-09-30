@@ -8,10 +8,21 @@
 import Foundation
 
 public enum HTTPAcceptType {
-    case XML(_: String = "application/xml")
-    case JSON(_: String = "application/json")
-    case HTML(_: String = "text/html")
-    case TEXT(_: String = "text/plain")
-    case JAVASCRIPT(_: String = "text/javascript")
+    case XML
+    case JSON
+    case HTML
+    case TEXT
+    case JAVASCRIPT
     case CUSTOM(String)
+    
+    public func string() -> String {
+        switch self {
+        case .XML: return "application/xml"
+        case .JSON: return "application/json"
+        case .HTML: return "text/html"
+        case .TEXT: return "text/plain"
+        case .JAVASCRIPT: return "text/javascript"
+        case .CUSTOM(let customType): return customType
+        }
+    }
 }

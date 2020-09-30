@@ -15,4 +15,11 @@ public enum HTTPRequestType
     case DELETE
     case HEAD
     case CUSTOM(String)
+    
+    public func string() -> String {
+        switch self {
+        case .CUSTOM(let customType): return customType
+        default: return "\(self)"
+        }
+    }
 }
