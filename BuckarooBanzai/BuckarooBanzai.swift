@@ -145,6 +145,8 @@ open class BuckarooBanzai: NSObject {
                 return
             }
             
+            httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data, parsedObject: stringFromData(data))
+            
             if let responseParser = service.responseParser {
                 do {
                     let object = try responseParser.parse(data)
@@ -178,6 +180,15 @@ open class BuckarooBanzai: NSObject {
         let contentTypeArray = contentTypeHeader.components(separatedBy: ";")
         if contentTypeArray.count > 0 {
             return contentTypeArray[0]
+        }
+        
+        return ""
+    }
+    
+    fileprivate func stringFromData(_ data: Data) -> String {
+        
+        if let string = String(data: data, encoding: .utf8) {
+            return string
         }
         
         return ""
