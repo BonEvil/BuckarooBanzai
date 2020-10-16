@@ -8,6 +8,7 @@
 import Foundation
 
 public enum HTTPAcceptType {
+    
     case XML
     case JSON
     case HTML
@@ -16,6 +17,7 @@ public enum HTTPAcceptType {
     case CUSTOM(String)
     
     public func string() -> String {
+        
         switch self {
         case .XML: return "application/xml"
         case .JSON: return "application/json"

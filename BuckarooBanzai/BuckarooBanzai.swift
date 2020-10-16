@@ -17,7 +17,7 @@ open class BuckarooBanzai: NSObject {
     
     lazy var queue: OperationQueue = {
         let queue = OperationQueue()
-        queue.name = "Banzai Queue"
+        queue.name = "Buckaroo.Queue"
         queue.maxConcurrentOperationCount = 4
         return queue
     }()
@@ -33,6 +33,7 @@ open class BuckarooBanzai: NSObject {
     // MARK: SHARED INSTANCE
     
     public class func sharedInstance() -> BuckarooBanzai {
+        
         guard let instance = BuckarooBanzai.instance else {
             BuckarooBanzai.instance = BuckarooBanzai()
             return BuckarooBanzai.instance!
@@ -44,12 +45,14 @@ open class BuckarooBanzai: NSObject {
     // MARK: SETUP METHODS
     
     fileprivate func createSession() {
+        
         session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
     }
     
     // MARK: PUBLIC METHODS
     
     public func resetSession() {
+        
         session = nil
         credential = nil
         createSession()
@@ -75,6 +78,7 @@ open class BuckarooBanzai: NSObject {
     // MARK: HELPER METHODS
     
     fileprivate func createRequest(_ service: Service) throws -> URLRequest {
+        
         let request = NSMutableURLRequest()
         
         request.url = URL(string: service.requestURL)
@@ -255,6 +259,7 @@ open class BuckarooBanzai: NSObject {
 extension BuckarooBanzai: URLSessionDelegate {
     
     open func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        
         if challenge.previousFailureCount == 0 {
             let authMethod = challenge.protectionSpace.authenticationMethod
             print("authentication method: \(authMethod)")

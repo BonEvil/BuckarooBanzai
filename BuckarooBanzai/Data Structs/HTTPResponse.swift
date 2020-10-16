@@ -8,6 +8,7 @@
 import Foundation
 
 public struct HTTPResponse {
+    
     public var statusCode: Int
     public var headers: [AnyHashable: Any]
     public var body: Data?

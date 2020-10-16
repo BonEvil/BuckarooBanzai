@@ -43,6 +43,7 @@ class FormRequestSerializer: RequestSerializer {
     }
     
     func urlEncode(_ string:String) -> String {
+        
         guard let encoded = string.addingPercentEncoding(withAllowedCharacters: customCharacterSet) else {
             return string
         }

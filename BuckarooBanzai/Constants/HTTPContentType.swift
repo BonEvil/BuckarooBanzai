@@ -8,12 +8,14 @@
 import Foundation
 
 public enum HTTPContentType {
+    
     case XML
     case JSON
     case FORM
     case CUSTOM(String)
     
     public func string() -> String {
+        
         switch self {
         case .XML: return "application/xml"
         case .JSON: return "application/json"

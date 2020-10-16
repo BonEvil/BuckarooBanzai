@@ -7,8 +7,8 @@
 
 import Foundation
 
-public enum HTTPRequestType
-{
+public enum HTTPRequestType {
+    
     case GET
     case POST
     case PUT
@@ -17,6 +17,7 @@ public enum HTTPRequestType
     case CUSTOM(String)
     
     public func string() -> String {
+        
         switch self {
         case .CUSTOM(let customType): return customType
         default: return "\(self)"
