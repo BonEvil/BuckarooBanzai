@@ -10,7 +10,7 @@ import Foundation
 public protocol Service {
 
     var requestType: HTTPRequestType { get }
-    var contentType: HTTPContentType { get }
+    var contentType: HTTPContentType? { get }
     var acceptType: HTTPAcceptType { get }
     var timeout: TimeInterval { get }
     var requestURL: String { get }
@@ -20,7 +20,7 @@ public protocol Service {
     
     var requestSerializer: RequestSerializer? { get }
     var responseParser: ResponseParser? { get }
-    var credential: URLCredential? { get }
+    var sessionDelegate: URLSessionTaskDelegate? { get }
     
     var testResponse: HTTPResponse? { get }
 }
