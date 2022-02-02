@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "BuckarooBanzai"
-  spec.version      = "0.0.1"
+  spec.version      = "0.2.0"
   spec.summary      = "A new way to do networking in Swift. That other one is old AF."
 
   # This description is used to generate tags and improve search results.
@@ -57,7 +57,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.swift_versions = "5.0"
-  spec.platform     = :ios, "9.0"
+  spec.platform = :ios, "15.0"
 
   #  When using multiple platforms
   # spec.ios.deployment_target = "5.0"

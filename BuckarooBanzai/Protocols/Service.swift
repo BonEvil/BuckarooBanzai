@@ -16,6 +16,7 @@ public protocol Service {
     var requestURL: String { get }
     
     var requestParams: [String: Any]? { get }
+    var requestBodyOverride: Data? { get }
     var additionalHeaders: [String: String]? { get }
     
     var requestSerializer: RequestSerializer? { get }

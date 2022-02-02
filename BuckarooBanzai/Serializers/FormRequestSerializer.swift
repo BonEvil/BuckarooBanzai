@@ -29,7 +29,7 @@ class FormRequestSerializer: RequestSerializer {
         
         for (key,value) in params {
             let encodedKey = urlEncode(key)
-            let encodedValue = urlEncode(value as! String)
+            let encodedValue = urlEncode("\(value)")
             body += encodedKey+"="+encodedValue+"&"
         }
         

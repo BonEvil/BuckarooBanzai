@@ -7,12 +7,13 @@
 
 import Foundation
 
-open class JSONResponseParser: ResponseParser {
+public class JSONResponseParser: ResponseParser {
+    public init() {}
     
-    open func parse(_ data: Data) throws -> Any {
+    public func parse(_ data: Data) throws -> Any {
         do {
             let responseBody = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments)
-            return responseBody as Any
+            return responseBody
         } catch let error {
             throw error
         }
