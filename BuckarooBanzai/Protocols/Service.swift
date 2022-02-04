@@ -10,7 +10,6 @@ import Foundation
 public protocol Service {
 
     var requestType: HTTPRequestType { get }
-    
     var acceptType: HTTPAcceptType { get }
     var timeout: TimeInterval { get }
     var requestURL: String { get }

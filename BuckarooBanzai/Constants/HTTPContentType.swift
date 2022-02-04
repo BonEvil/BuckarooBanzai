@@ -22,10 +22,20 @@ public enum HTTPContentType {
         }
     }
     
-    public func contentTypeFromString(_ string: String) -> HTTPContentType {
-        switch self {
-        case .XML, .JSON, .FORM : return self
-        case .CUSTOM(let customString): return .CUSTOM(customString)
+    public static func contentTypeFromString(_ contentTypeString: String) -> HTTPContentType? {
+        let contentTypeArray = contentTypeString.components(separatedBy: ";")
+        guard let contentType = contentTypeArray.first else {
+            return nil
+        }
+        
+        if HTTPContentType.XML.string() == contentType {
+            return .XML
+        } else if HTTPContentType.JSON.string() == contentType {
+            return .JSON
+        } else if HTTPContentType.FORM.string() == contentType {
+            return .FORM
+        } else {
+            return .CUSTOM(contentTypeString)
         }
     }
 }
