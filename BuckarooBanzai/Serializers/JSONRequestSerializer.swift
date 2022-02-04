@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct JSONRequestSerializer: RequestSerializer {
+struct JSONRequestSerializer: RequestSerializer {
 
-    public func serialize(_ object: Any) throws -> Data {
+    func serialize(_ object: Any) throws -> Data {
         
         if !JSONSerialization.isValidJSONObject(object) {
             throw NSError(domain: "JsONSerialization", code: -1, userInfo: [NSLocalizedDescriptionKey: "Will not produce a valid JsON object | \(object)."])

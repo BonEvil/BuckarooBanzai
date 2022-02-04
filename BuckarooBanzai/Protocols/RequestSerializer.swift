@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol RequestSerializer
-{
+public protocol RequestSerializer {
+    
     func serialize(_ object: Any) throws -> Data
 }

@@ -11,9 +11,9 @@ open class BuckarooBanzai: NSObject {
         
     fileprivate static var instance: BuckarooBanzai?
     
-    public static var errorDomain = "BuckarooBanzaiError"
-    public static let BBHTTPResponseErrorKey = "_bbHttpResponseErrorKey"
-    public static let BBHTTPStatusCodeErrorKey = "_bbHttpStatusCodeErrorKey"
+    public static var errorDomain = "BuckarooBanzaiErrorDomain"
+    static let BBHTTPResponseErrorKey = "_bbHttpResponseErrorKey"
+    static let BBHTTPStatusCodeErrorKey = "_bbHttpStatusCodeErrorKey"
     
     lazy var queue: OperationQueue = {
         let queue = OperationQueue()
@@ -54,12 +54,39 @@ open class BuckarooBanzai: NSObject {
     }
     
     public func start(service: Service) async throws -> HTTPResponse {
+        if let testResponse = service.testResponse {
+            let response = try doTestResponse(testResponse, withAcceptType: service.acceptType)
+            return response
+        }
+        
         let request = try createRequest(service)
         let response = try await sendRequest(request, forService: service)
         return response
     }
     
     // MARK: - PRIVATE METHODS
+    
+    fileprivate func doTestResponse(_ httpResponse: HTTPResponse, withAcceptType acceptType: HTTPAcceptType) throws -> HTTPResponse {
+        do {
+            try checkStatusCode(httpResponse.statusCode)
+        } catch let error as NSError {
+            var userInfo = error.userInfo
+            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
+            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
+            throw modError
+        }
+        
+        do {
+            try checkContentType(contentType(fromHeaders: httpResponse.headers), forAcceptType: acceptType.string())
+        } catch let error as NSError {
+            var userInfo = error.userInfo
+            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
+            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
+            throw modError
+        }
+        
+        return httpResponse
+    }
     
     fileprivate func createRequest(_ service: Service) throws -> URLRequest {
         let request = NSMutableURLRequest()
@@ -78,15 +105,11 @@ open class BuckarooBanzai: NSObject {
         }
         request.setValue(service.acceptType.string(), forHTTPHeaderField: "Accept")
         
-        guard let requestParams = service.requestParams, requestParams.count > 0 else {
-            return request as URLRequest
-        }
-        
         if let body = service.requestBodyOverride {
             request.httpBody = body
             return request as URLRequest
         }
-        
+                
         do {
             let data = try serializeRequest(forService: service)
             request.httpBody = data
@@ -105,7 +128,7 @@ open class BuckarooBanzai: NSObject {
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
         let statusCode = httpUrlResponse.statusCode
-        var httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data, parsedObject: nil)
+        let httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data)
         
         do {
             try checkStatusCode(statusCode)
@@ -128,11 +151,6 @@ open class BuckarooBanzai: NSObject {
             throw modError
         }
         
-        if let parser = service.responseParser {
-            let parsedObject = try parseWithCustomParser(parser, usingData: data)
-            httpResponse.parsedObject = parsedObject
-        }
-        
         return httpResponse
     }
     
@@ -143,7 +161,7 @@ open class BuckarooBanzai: NSObject {
     }
     
     fileprivate func checkContentType(_ receivedContentType: String, forAcceptType acceptType: String) throws {
-        if receivedContentType != acceptType {
+        if acceptType != HTTPAcceptType.ANY.string() && receivedContentType != acceptType {
             throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Expecting Content-Type [\(acceptType)] but got [\(receivedContentType)]"])
         }
     }
@@ -162,33 +180,24 @@ open class BuckarooBanzai: NSObject {
         return ""
     }
     
-    fileprivate func parseWithCustomParser(_ parser: ResponseParser, usingData data: Data) throws -> Any {
-        do {
-            let object: Any = try parser.parse(data)
-            return object
-        } catch let error {
-            throw error
-        }
-    }
-    
     // MARK: - Serialize request body
     
     fileprivate func serializeRequest(forService service: Service) throws -> Data? {
         
-        guard let requestParams = service.requestParams, requestParams.count > 0 else {
+        guard let requestBody = service.requestBody as? [String: Any], requestBody.count > 0 else {
             return nil
         }
         
         if let serializer = service.requestSerializer  {
-            return try serializeRequestParams(requestParams, withCustomSerializer: serializer)
+            return try serializeRequestParams(requestBody, withCustomSerializer: serializer)
         } else {
-            return try serializeRequestParams(requestParams, forContentType: service.contentType)
+            return try serializeRequestParams(requestBody, forContentType: service.contentType)
         }
     }
     
     // MARK: - Custom request serializer
     
-    fileprivate func serializeRequestParams(_ requestParams: [String: Any], withCustomSerializer serializer: RequestSerializer) throws -> Data {
+    fileprivate func serializeRequestParams(_ requestParams: Any, withCustomSerializer serializer: RequestSerializer) throws -> Data {
         do {
             let data = try serializer.serialize(requestParams as Any)
             return data
@@ -199,7 +208,7 @@ open class BuckarooBanzai: NSObject {
     
     // MARK: - Standard request body serializers
     
-    fileprivate func serializeRequestParams(_ requestParams: [String: Any], forContentType contentType: HTTPContentType?) throws -> Data? {
+    fileprivate func serializeRequestParams(_ requestParams: Any, forContentType contentType: HTTPContentType?) throws -> Data? {
         guard let contentType = contentType else {
             return nil
         }
@@ -214,39 +223,21 @@ open class BuckarooBanzai: NSObject {
         }
     }
     
-    fileprivate func serializeJsonFromRequestParams(_ requestParams: [String: Any]) throws -> Data {
+    fileprivate func serializeJsonFromRequestParams(_ requestParams: Any) throws -> Data {
         do {
-            let data = try JSONRequestSerializer().serialize(requestParams as Any)
+            let data = try JSONRequestSerializer().serialize(requestParams)
             return data
         } catch let error {
             throw error
         }
     }
     
-    fileprivate func serializeFormFromRequestParams(_ requestParams: [String: Any]) throws -> Data {
+    fileprivate func serializeFormFromRequestParams(_ requestParams: Any) throws -> Data {
         do {
-            let data = try FormRequestSerializer().serialize(requestParams as Any)
+            let data = try FormRequestSerializer().serialize(requestParams)
             return data
         } catch let error {
             throw error
         }
-    }
-}
-
-extension Error {
-    public func httpResponse() -> HTTPResponse? {
-        if let response = (self as NSError).userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] as? HTTPResponse {
-            return response
-        }
-        
-        return nil
-    }
-    
-    public func httpStatusCode() -> Int? {
-        if let statusCode = (self as NSError).userInfo[BuckarooBanzai.BBHTTPStatusCodeErrorKey] as? Int {
-            return statusCode
-        }
-        
-        return nil
     }
 }

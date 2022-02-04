@@ -13,6 +13,7 @@ public enum HTTPAcceptType {
     case HTML
     case TEXT
     case JAVASCRIPT
+    case ANY
     case CUSTOM(String)
     
     public func string() -> String {
@@ -22,6 +23,7 @@ public enum HTTPAcceptType {
         case .HTML: return "text/html"
         case .TEXT: return "text/plain"
         case .JAVASCRIPT: return "text/javascript"
+        case .ANY: return "*/*"
         case .CUSTOM(let customType): return customType
         }
     }

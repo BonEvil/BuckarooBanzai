@@ -21,6 +21,7 @@
 		6B8850B8251E8FD5000C4C73 /* HTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8850B7251E8FD5000C4C73 /* HTTPResponse.swift */; };
 		6B8850BF251E9181000C4C73 /* JSONResponseParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8850BE251E9181000C4C73 /* JSONResponseParser.swift */; };
 		6BC3A1EA2523D6D900742FCB /* FormRequestSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BC3A1E92523D6D900742FCB /* FormRequestSerializer.swift */; };
+		6BF6C9C827ADC10300EDF755 /* Error+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF6C9C727ADC10300EDF755 /* Error+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		6B8850B7251E8FD5000C4C73 /* HTTPResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPResponse.swift; sourceTree = "<group>"; };
 		6B8850BE251E9181000C4C73 /* JSONResponseParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONResponseParser.swift; sourceTree = "<group>"; };
 		6BC3A1E92523D6D900742FCB /* FormRequestSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormRequestSerializer.swift; sourceTree = "<group>"; };
+		6BF6C9C727ADC10300EDF755 /* Error+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Error+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				6B885096251D7065000C4C73 /* Serializers */,
 				6B8850BD251E915A000C4C73 /* Parsers */,
 				6B8850B6251E8FA7000C4C73 /* Data Structs */,
+				6BF6C9C627ADC0D200EDF755 /* Extentions */,
 				6B885049251D3BDF000C4C73 /* BuckarooBanzai.h */,
 				6B88504A251D3BDF000C4C73 /* Info.plist */,
 			);
@@ -157,6 +160,14 @@
 				6B8850BE251E9181000C4C73 /* JSONResponseParser.swift */,
 			);
 			path = Parsers;
+			sourceTree = "<group>";
+		};
+		6BF6C9C627ADC0D200EDF755 /* Extentions */ = {
+			isa = PBXGroup;
+			children = (
+				6BF6C9C727ADC10300EDF755 /* Error+Extension.swift */,
+			);
+			path = Extentions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -278,6 +289,7 @@
 				6B8850B8251E8FD5000C4C73 /* HTTPResponse.swift in Sources */,
 				6B8850BF251E9181000C4C73 /* JSONResponseParser.swift in Sources */,
 				6B88506C251D425B000C4C73 /* HTTPRequestType.swift in Sources */,
+				6BF6C9C827ADC10300EDF755 /* Error+Extension.swift in Sources */,
 				6B885093251D6F85000C4C73 /* ResponseParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

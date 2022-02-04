@@ -21,4 +21,11 @@ public enum HTTPContentType {
         case .CUSTOM(let customType): return customType
         }
     }
+    
+    public func contentTypeFromString(_ string: String) -> HTTPContentType {
+        switch self {
+        case .XML, .JSON, .FORM : return self
+        case .CUSTOM(let customString): return .CUSTOM(customString)
+        }
+    }
 }

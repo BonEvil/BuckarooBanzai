@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FormRequestSerializer: RequestSerializer {
+struct FormRequestSerializer: RequestSerializer {
     
     var customCharacterSet:CharacterSet {
         var charSet = NSCharacterSet.urlQueryAllowed
@@ -19,7 +19,7 @@ class FormRequestSerializer: RequestSerializer {
         return charSet
     }
     
-    open func serialize(_ object: Any) throws -> Data {
+    func serialize(_ object: Any) throws -> Data {
         
         guard let params = object as? [String: Any] else {
             throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Params should be in a one-level Dictionary<String,Any>"])
