@@ -49,6 +49,7 @@ open class BuckarooBanzai: NSObject {
     // MARK: - PUBLIC METHODS
     
     public func resetSession() {
+        session.invalidateAndCancel()
         session = nil
         createSession()
     }
@@ -69,23 +70,14 @@ open class BuckarooBanzai: NSObject {
     fileprivate func doTestResponse(_ httpResponse: HTTPResponse, withAcceptType acceptType: HTTPAcceptType) throws -> HTTPResponse {
         do {
             try checkStatusCode(httpResponse.statusCode)
-        } catch let error as NSError {
-            var userInfo = error.userInfo
-            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
-            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
-            throw modError
-        }
-        
-        do {
             try checkContentType(contentType(fromHeaders: httpResponse.headers), forAcceptType: acceptType.string())
+            return httpResponse
         } catch let error as NSError {
             var userInfo = error.userInfo
             userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
             let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
             throw modError
         }
-        
-        return httpResponse
     }
     
     fileprivate func createRequest(_ service: Service) throws -> URLRequest {
@@ -123,35 +115,25 @@ open class BuckarooBanzai: NSObject {
         let (data, response) = try await session.data(for: request, delegate: service.sessionDelegate)
         
         guard let httpUrlResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey : "Bad response."])
+            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid response."])
         }
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
         let statusCode = httpUrlResponse.statusCode
         let httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data)
-        
-        do {
-            try checkStatusCode(statusCode)
-        } catch let error as NSError {
-            var userInfo = error.userInfo
-            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
-            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
-            throw modError
-        }
-        
         let receivedContentType = self.contentType(fromHeaders: allHeaderFields)
         let acceptType = service.acceptType.string()
         
         do {
+            try checkStatusCode(statusCode)
             try checkContentType(receivedContentType, forAcceptType: acceptType)
+            return httpResponse
         } catch let error as NSError {
             var userInfo = error.userInfo
             userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
             let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
             throw modError
         }
-        
-        return httpResponse
     }
     
     fileprivate func checkStatusCode(_ statusCode: Int) throws {
