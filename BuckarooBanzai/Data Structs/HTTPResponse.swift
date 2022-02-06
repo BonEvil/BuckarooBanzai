@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public struct HTTPResponse {
     
@@ -26,5 +27,16 @@ public struct HTTPResponse {
         let decoder = JSONDecoder()
         let object = try decoder.decode(T.self, from: data)
         return object
+    }
+    
+    public func decodeBodyDataAsImage() throws -> UIImage {
+        guard let data = body else {
+            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "No body data found."])
+        }
+        guard let image = UIImage(data: data) else {
+            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "Could not create image from data."])
+        }
+        
+        return image
     }
 }

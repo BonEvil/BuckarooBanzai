@@ -11,7 +11,7 @@ open class BuckarooBanzai: NSObject {
         
     fileprivate static var instance: BuckarooBanzai?
     
-    public static var errorDomain = "BuckarooBanzaiErrorDomain"
+    static let errorDomain = "BuckarooBanzaiErrorDomain"
     static let BBHTTPResponseErrorKey = "_bbHttpResponseErrorKey"
     static let BBHTTPStatusCodeErrorKey = "_bbHttpStatusCodeErrorKey"
     
@@ -115,7 +115,7 @@ open class BuckarooBanzai: NSObject {
         let (data, response) = try await session.data(for: request, delegate: service.sessionDelegate)
         
         guard let httpUrlResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey : "Invalid response."])
+            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey : "Invalid response."])
         }
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
@@ -131,20 +131,19 @@ open class BuckarooBanzai: NSObject {
         } catch let error as NSError {
             var userInfo = error.userInfo
             userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
-            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
-            throw modError
+            throw BuckarooBanzai.createErrorWithUserInfo(userInfo)
         }
     }
     
     fileprivate func checkStatusCode(_ statusCode: Int) throws {
         if statusCode < 200 || statusCode >= 300 {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Status code not OK: \(statusCode)", BuckarooBanzai.BBHTTPStatusCodeErrorKey: statusCode])
+            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "Status code not OK: \(statusCode)", BuckarooBanzai.BBHTTPStatusCodeErrorKey: statusCode])
         }
     }
     
     fileprivate func checkContentType(_ receivedContentType: String, forAcceptType acceptType: String) throws {
         if acceptType != HTTPAcceptType.ANY.string() && receivedContentType != acceptType {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Expecting Content-Type [\(acceptType)] but got [\(receivedContentType)]"])
+            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "Expecting Content-Type [\(acceptType)] but got [\(receivedContentType)]"])
         }
     }
     
@@ -179,7 +178,7 @@ open class BuckarooBanzai: NSObject {
     
     // MARK: - Custom request serializer
     
-    fileprivate func serializeRequestParams(_ requestParams: Any, withCustomSerializer serializer: RequestSerializer) throws -> Data {
+    fileprivate func serializeRequestParams(_ requestParams: Any, withCustomSerializer serializer: RequestSerializer) throws -> Data? {
         do {
             let data = try serializer.serialize(requestParams as Any)
             return data
@@ -205,7 +204,7 @@ open class BuckarooBanzai: NSObject {
         }
     }
     
-    fileprivate func serializeJsonFromRequestParams(_ requestParams: Any) throws -> Data {
+    fileprivate func serializeJsonFromRequestParams(_ requestParams: Any) throws -> Data? {
         do {
             let data = try JSONRequestSerializer().serialize(requestParams)
             return data
@@ -214,12 +213,18 @@ open class BuckarooBanzai: NSObject {
         }
     }
     
-    fileprivate func serializeFormFromRequestParams(_ requestParams: Any) throws -> Data {
+    fileprivate func serializeFormFromRequestParams(_ requestParams: Any) throws -> Data? {
         do {
             let data = try FormRequestSerializer().serialize(requestParams)
             return data
         } catch let error {
             throw error
         }
+    }
+}
+
+extension BuckarooBanzai {
+    static func createErrorWithUserInfo(_ userInfo: [String: Any]) -> NSError {
+        return NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: userInfo)
     }
 }
