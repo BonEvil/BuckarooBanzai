@@ -12,8 +12,8 @@ public struct JSONResponseParser: ResponseParser {
         do {
             let responseBody = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments)
             return responseBody
-        } catch let error {
-            throw error
+        } catch let error as NSError {
+            throw BBError.parser(error.userInfo)
         }
     }
 }

@@ -7,30 +7,58 @@
 
 import Foundation
 
+/// The main object for calling network services.
+///
+/// Create a singleton instance for all your networking calls.
+///  ```swift
+///  BuckarooBanzai.sharedInstance()
+///  ```
 open class BuckarooBanzai: NSObject {
-        
+    
+    /// Singleton instance
     fileprivate static var instance: BuckarooBanzai?
     
+    /// Domain for errors thrown in ``BuckarooBanzai``
     static let errorDomain = "BuckarooBanzaiErrorDomain"
+    
+    /// Key for retrieving the ``HTTPResponse`` object from the `userInfo` dictionary of a thrown error, if available
+    ///
+    /// ```swift
+    /// if let response = error.httpResponse() {}
+    /// ```
     static let BBHTTPResponseErrorKey = "_bbHttpResponseErrorKey"
+    
+    /// Key for retrieving the HTTP status code from the `userInfo` dictionary of a thrown error
+    ///
+    /// ```swift
+    /// if let statusCode = error.httpStatusCode() {}
+    /// ```
     static let BBHTTPStatusCodeErrorKey = "_bbHttpStatusCodeErrorKey"
     
+    /// Name of the operation queue for the URLSession object
+    static let OperationQueueName = "BuckarooQueue"
+    
+    /// The queue on which network calls will run
+    ///
+    /// Since this is a dedicated queue, make sure to do UI updates on the main queue.
     lazy var queue: OperationQueue = {
         let queue = OperationQueue()
-        queue.name = "Buckaroo_Queue"
+        queue.name = BuckarooBanzai.OperationQueueName
         queue.maxConcurrentOperationCount = 4
         return queue
     }()
     
+    /// The dedicated session used for network calls
     fileprivate var session: Foundation.URLSession!
     
     private override init() {
         super.init()
         createSession()
     }
-    
-    // MARK: SHARED INSTANCE
-    
+
+    /// Creates the BuckarooBanzai shared instance
+    /// 
+    /// - Returns: The singleton instance.
     public class func sharedInstance() -> BuckarooBanzai {
         guard let instance = BuckarooBanzai.instance else {
             BuckarooBanzai.instance = BuckarooBanzai()
@@ -40,20 +68,34 @@ open class BuckarooBanzai: NSObject {
         return instance
     }
     
-    // MARK: SETUP METHODS
-    
+    /// Creates a new session running on the dedicated `OperationQueue`
     fileprivate func createSession() {
         session = URLSession(configuration: .default, delegate: nil, delegateQueue: queue)
     }
     
-    // MARK: - PUBLIC METHODS
-    
+    /// Invalidate and cancel the current `URLSession` and instantiate a new instance
+    ///
+    /// This method is particularly useful because of the nature of a `URLSession` to hold on to the last used credentials when answering a `URLAuthenticationChallenge`.
+    ///
+    /// Since the initial challenge is an expensive operation, the session will simply re-use the existing handshake for a certain period of time (up to 10 minutes in some cases) even if the challenge credentials are changed.
+    /// i.e. Such as when switching users within the same app.
     public func resetSession() {
         session.invalidateAndCancel()
         session = nil
         createSession()
     }
     
+    /// Starts a network ``Service`` asynchronously
+    ///
+    /// This async/await method returns an instance of ``HTTPResponse`` that will house the relevant information to be used in further processing.
+    ///
+    /// ```swift
+    /// let service = CustomService()
+    /// let response = try await BuckarooBanzai.sharedInstance().start(service: service)
+    /// ```
+    ///
+    /// - Parameter service: The configured service object.
+    /// - Returns: An ``HTTPResponse`` object or throws an error based on the expected response.
     public func start(service: Service) async throws -> HTTPResponse {
         if let testResponse = service.testResponse {
             let response = try doTestResponse(testResponse, withAcceptType: service.acceptType)
@@ -65,18 +107,25 @@ open class BuckarooBanzai: NSObject {
         return response
     }
     
-    // MARK: - PRIVATE METHODS
-    
+    /// Off-network testing
+    ///
+    /// If a ``Service/testResponse`` is set in the ``Service`` object, an off-network process is run to validate and return the ``HTTPResponse`` provided,
+    ///
+    /// - Parameters:
+    ///   - httpResponse: The pre-constructed ``HTTPResponse`` object used to simulate a network call response
+    ///   - acceptType: The ``HTTPAcceptType`` that the caller is expecting from this service
+    /// - Returns: The ``HTTPResponse`` provided or throws an error based on information contained in the response
     fileprivate func doTestResponse(_ httpResponse: HTTPResponse, withAcceptType acceptType: HTTPAcceptType) throws -> HTTPResponse {
         do {
             try checkStatusCode(httpResponse.statusCode)
             try checkContentType(contentType(fromHeaders: httpResponse.headers), forAcceptType: acceptType.string())
             return httpResponse
-        } catch let error as NSError {
-            var userInfo = error.userInfo
-            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
-            let modError = NSError(domain: error.domain, code: error.code, userInfo: userInfo)
-            throw modError
+        } catch let error as BBError {
+            if var userInfo = error.userInfo {
+                userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
+                throw error.updateUserInfoWith(userInfo: userInfo)
+            }
+            throw error
         }
     }
     
@@ -97,11 +146,13 @@ open class BuckarooBanzai: NSObject {
         }
         request.setValue(service.acceptType.string(), forHTTPHeaderField: "Accept")
         
-        if let body = service.requestBodyOverride {
+        /// If the service already has the request body as `Data`, just add to the request
+        if let body = service.requestBody {
             request.httpBody = body
             return request as URLRequest
         }
-                
+        
+        /// Try to serialize the the request parameters to form the `request.httpBody` `Data`
         do {
             let data = try serializeRequest(forService: service)
             request.httpBody = data
@@ -115,7 +166,7 @@ open class BuckarooBanzai: NSObject {
         let (data, response) = try await session.data(for: request, delegate: service.sessionDelegate)
         
         guard let httpUrlResponse = response as? HTTPURLResponse else {
-            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey : "Invalid response."])
+            throw BBError.general([NSLocalizedDescriptionKey : "Invalid response."])
         }
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
@@ -128,22 +179,27 @@ open class BuckarooBanzai: NSObject {
             try checkStatusCode(statusCode)
             try checkContentType(receivedContentType, forAcceptType: acceptType)
             return httpResponse
-        } catch let error as NSError {
-            var userInfo = error.userInfo
-            userInfo[BuckarooBanzai.BBHTTPResponseErrorKey] = httpResponse
-            throw BuckarooBanzai.createErrorWithUserInfo(userInfo)
+        } catch let error as BBError {
+            var additionalInfo: [String: Any] = [BuckarooBanzai.BBHTTPResponseErrorKey: httpResponse]
+            guard let userInfo = error.userInfo else {
+                throw error.updateUserInfoWith(userInfo: additionalInfo)
+            }
+            additionalInfo.merge(userInfo) { (current, _) in
+                current
+            }
+            throw error.updateUserInfoWith(userInfo: userInfo)
         }
     }
     
     fileprivate func checkStatusCode(_ statusCode: Int) throws {
         if statusCode < 200 || statusCode >= 300 {
-            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "Status code not OK: \(statusCode)", BuckarooBanzai.BBHTTPStatusCodeErrorKey: statusCode])
+            throw BBError.statusCode([NSLocalizedDescriptionKey: "Status code not OK: \(statusCode)", BuckarooBanzai.BBHTTPStatusCodeErrorKey: statusCode])
         }
     }
     
     fileprivate func checkContentType(_ receivedContentType: String, forAcceptType acceptType: String) throws {
         if acceptType != HTTPAcceptType.ANY.string() && receivedContentType != acceptType {
-            throw BuckarooBanzai.createErrorWithUserInfo([NSLocalizedDescriptionKey: "Expecting Content-Type [\(acceptType)] but got [\(receivedContentType)]"])
+            throw BBError.contentType([NSLocalizedDescriptionKey: "Expecting Content-Type [\(acceptType)] but got [\(receivedContentType)]"])
         }
     }
     
@@ -161,23 +217,27 @@ open class BuckarooBanzai: NSObject {
         return ""
     }
     
-    // MARK: - Serialize request body
-    
+    /// Checks to see of the `Service.requestBody` is a `Dictionary<String: Any>` and try to process it if it is.
+    ///
+    /// This method uses the provided serializer if available, otherwise, sends the `parameters` object on to see if it can be parsed by the included serializers.
+    ///
+    /// Currently, only JSON and URL-encoded Form serializers are included.
+    ///
+    /// - Parameter service: The configured service object.
+    /// - Returns: `Data` created by the serializer, `nil` if there weren't any parameters or if the `Service.contentType` was not set or throws an error produced by the serializer.
     fileprivate func serializeRequest(forService service: Service) throws -> Data? {
         
-        guard let requestBody = service.requestBody as? [String: Any], requestBody.count > 0 else {
+        guard let parameters = service.parameters, parameters.count > 0 else {
             return nil
         }
         
         if let serializer = service.requestSerializer  {
-            return try serializeRequestParams(requestBody, withCustomSerializer: serializer)
+            return try serializeRequestParams(parameters, withCustomSerializer: serializer)
         } else {
-            return try serializeRequestParams(requestBody, forContentType: service.contentType)
+            return try serializeRequestParams(parameters, forContentType: service.contentType)
         }
     }
-    
-    // MARK: - Custom request serializer
-    
+        
     fileprivate func serializeRequestParams(_ requestParams: Any, withCustomSerializer serializer: RequestSerializer) throws -> Data? {
         do {
             let data = try serializer.serialize(requestParams as Any)
@@ -186,9 +246,7 @@ open class BuckarooBanzai: NSObject {
             throw error
         }
     }
-    
-    // MARK: - Standard request body serializers
-    
+        
     fileprivate func serializeRequestParams(_ requestParams: Any, forContentType contentType: HTTPContentType?) throws -> Data? {
         guard let contentType = contentType else {
             return nil
@@ -200,7 +258,7 @@ open class BuckarooBanzai: NSObject {
         case .FORM:
             return try serializeFormFromRequestParams(requestParams)
         default:
-            return nil
+            throw BBError.serializer([NSLocalizedDescriptionKey: "No default serializer for content type: \(contentType.string())"])
         }
     }
     
@@ -220,11 +278,5 @@ open class BuckarooBanzai: NSObject {
         } catch let error {
             throw error
         }
-    }
-}
-
-extension BuckarooBanzai {
-    static func createErrorWithUserInfo(_ userInfo: [String: Any]) -> NSError {
-        return NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: userInfo)
     }
 }

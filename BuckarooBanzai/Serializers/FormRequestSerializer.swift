@@ -22,7 +22,7 @@ struct FormRequestSerializer: RequestSerializer {
     func serialize(_ object: Any) throws -> Data {
         
         guard let params = object as? [String: Any] else {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Params should be in a one-level Dictionary<String,Any>"])
+            throw BBError.serializer([NSLocalizedDescriptionKey: "Params should be in a one-level Dictionary<String,Any>"])
         }
 
         var body = ""
@@ -38,7 +38,7 @@ struct FormRequestSerializer: RequestSerializer {
         if let formData = body.data(using: String.Encoding.utf8) {
             return formData
         } else {
-            throw NSError(domain: BuckarooBanzai.errorDomain, code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not convert string params to Data."])
+            throw BBError.serializer([NSLocalizedDescriptionKey: "Could not convert string params to Data."])
         }
     }
     
