@@ -10,7 +10,6 @@ import UIKit
 
 public enum BBError: Error {
     case general(_ userInfo: [String: Any]?)
-    case underlying(_ userInfo: [String: Any]?)
     case statusCode(_ userInfo: [String: Any]?)
     case contentType(_ userInfo: [String: Any]?)
     case serializer(_ userInfo: [String: Any]?)
@@ -22,8 +21,6 @@ public enum BBError: Error {
         
         case .general(_):
             return BBError.general(userInfo)
-        case .underlying(_):
-            return BBError.underlying(userInfo)
         case .statusCode(_):
             return BBError.statusCode(userInfo)
         case .contentType(_):
@@ -43,7 +40,6 @@ extension BBError: LocalizedError {
         switch self {
             case
             .general(let userInfo),
-            .underlying(let userInfo),
             .statusCode(let userInfo),
             .contentType(let userInfo),
             .serializer(let userInfo),
@@ -64,7 +60,6 @@ extension BBError {
             switch self {
                 case
                 .general(let userInfo),
-                .underlying(let userInfo),
                 .statusCode(let userInfo),
                 .contentType(let userInfo),
                 .serializer(let userInfo),

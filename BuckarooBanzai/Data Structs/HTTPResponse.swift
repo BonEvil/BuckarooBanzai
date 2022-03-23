@@ -10,6 +10,15 @@ import UIKit
 
 public struct HTTPResponse {
     
+    /// The HTTP status code returned from the service call.
+    public var statusCode: Int
+    
+    /// Any key/value pairs returned in the header from the service call.
+    public var headers: [AnyHashable: Any]
+    
+    /// The data returned in the body from the service call.
+    public var body: Data?
+    
     /// Default initializer for the repsonse object
     /// - Parameters:
     ///   - statusCode: Will hold the HTTP status code returned from the service call.
@@ -20,16 +29,7 @@ public struct HTTPResponse {
         self.headers = headers
         self.body = body
     }
-    
-    /// The HTTP status code returned from the service call.
-    public var statusCode: Int
-    
-    /// Any key/value pairs returned in the header from the service call.
-    public var headers: [AnyHashable: Any]
-    
-    /// The data returned in the body from the service call.
-    public var body: Data?
-    
+
     /// A convenience method to do simple decoding of JSON-structured data returned from the service.
     ///
     /// This method takes a Decodable Generic and tries to parse it into the object provided.

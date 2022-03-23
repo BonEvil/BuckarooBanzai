@@ -146,7 +146,7 @@ open class BuckarooBanzai: NSObject {
         }
         request.setValue(service.acceptType.string(), forHTTPHeaderField: "Accept")
         
-        /// If the service already has the request body as `Data`, just add to the request
+        /// If the service already has the request body as `Data`, just add it to the request and return
         if let body = service.requestBody {
             request.httpBody = body
             return request as URLRequest
@@ -157,7 +157,7 @@ open class BuckarooBanzai: NSObject {
             let data = try serializeRequest(forService: service)
             request.httpBody = data
             return request as URLRequest
-        } catch let error {
+        } catch let error as BBError {
             throw error
         }
     }
@@ -223,7 +223,8 @@ open class BuckarooBanzai: NSObject {
     ///
     /// Currently, only JSON and URL-encoded Form serializers are included.
     ///
-    /// - Parameter service: The configured service object.
+    /// - Parameters:
+    ///   - service: The configured service object.
     /// - Returns: `Data` created by the serializer, `nil` if there weren't any parameters or if the `Service.contentType` was not set or throws an error produced by the serializer.
     fileprivate func serializeRequest(forService service: Service) throws -> Data? {
         
@@ -237,13 +238,21 @@ open class BuckarooBanzai: NSObject {
             return try serializeRequestParams(parameters, forContentType: service.contentType)
         }
     }
-        
+    
+    /// Custom serializer processing
+    ///
+    /// If a `Service.requestSerializer` is provided, this method attempts to use it to serialize the `Service.parameters`.
+    ///
+    /// - Parameters:
+    ///   - requestParams: The `Service.parameters` for the network call.
+    ///   - serializer: The custom serializer conforming to the `RequestSerializer` protocol.
+    /// - Returns: A `Data` representation of the serialized parameters, `nil`, or throws an error if the task could not be completed.
     fileprivate func serializeRequestParams(_ requestParams: Any, withCustomSerializer serializer: RequestSerializer) throws -> Data? {
         do {
             let data = try serializer.serialize(requestParams as Any)
             return data
-        } catch let error {
-            throw error
+        } catch let error as NSError {
+            throw BBError.serializer(error.userInfo)
         }
     }
         
@@ -266,8 +275,8 @@ open class BuckarooBanzai: NSObject {
         do {
             let data = try JSONRequestSerializer().serialize(requestParams)
             return data
-        } catch let error {
-            throw error
+        } catch let error as NSError {
+            throw BBError.serializer(error.userInfo)
         }
     }
     
@@ -275,8 +284,8 @@ open class BuckarooBanzai: NSObject {
         do {
             let data = try FormRequestSerializer().serialize(requestParams)
             return data
-        } catch let error {
-            throw error
+        } catch let error as NSError {
+            throw BBError.serializer(error.userInfo)
         }
     }
 }
