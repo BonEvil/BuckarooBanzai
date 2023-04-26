@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6B54AD0E29F9C14300A443FC /* HTTPResponse+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B54AD0D29F9C14300A443FC /* HTTPResponse+ext.swift */; };
 		6B885050251D3BDF000C4C73 /* BuckarooBanzai.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6B885046251D3BDF000C4C73 /* BuckarooBanzai.framework */; };
 		6B885055251D3BDF000C4C73 /* BuckarooBanzaiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B885054251D3BDF000C4C73 /* BuckarooBanzaiTests.swift */; };
 		6B885057251D3BE0000C4C73 /* BuckarooBanzai.h in Headers */ = {isa = PBXBuildFile; fileRef = 6B885049251D3BDF000C4C73 /* BuckarooBanzai.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6B54AD0D29F9C14300A443FC /* HTTPResponse+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPResponse+ext.swift"; sourceTree = "<group>"; };
 		6B885046251D3BDF000C4C73 /* BuckarooBanzai.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BuckarooBanzai.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B885049251D3BDF000C4C73 /* BuckarooBanzai.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BuckarooBanzai.h; sourceTree = "<group>"; };
 		6B88504A251D3BDF000C4C73 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -150,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				6B8850B7251E8FD5000C4C73 /* HTTPResponse.swift */,
+				6B54AD0D29F9C14300A443FC /* HTTPResponse+ext.swift */,
 			);
 			path = "Data Structs";
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6BC3A1EA2523D6D900742FCB /* FormRequestSerializer.swift in Sources */,
+				6B54AD0E29F9C14300A443FC /* HTTPResponse+ext.swift in Sources */,
 				6B885064251D3D5A000C4C73 /* HTTPContentType.swift in Sources */,
 				6B885068251D410F000C4C73 /* HTTPAcceptType.swift in Sources */,
 				6BF6C9CA27B167D100EDF755 /* BBError.swift in Sources */,

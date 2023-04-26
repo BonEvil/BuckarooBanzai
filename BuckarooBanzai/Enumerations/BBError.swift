@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UIKit
 
 public enum BBError: Error {
     case general(_ userInfo: [String: Any]?)
