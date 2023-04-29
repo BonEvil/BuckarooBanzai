@@ -16,17 +16,15 @@ struct BaseService: Service {
     var timeout: TimeInterval = 10
     var requestURL: String = "https://httpbin.org"
     var requestBody: Data?
-    var parameters: [String : Any]?
-    var additionalHeaders: [String : String]?
+    var parameters: [AnyHashable: Any]?
+    var additionalHeaders: [AnyHashable: Any]?
     var requestSerializer: RequestSerializer?
     var sessionDelegate: URLSessionTaskDelegate?
     var testResponse: HTTPResponse?
 
     init(withPath path: String, serviceParams: [AnyHashable: Any]? = nil) {
         requestURL = requestURL + path
-        if let serviceParams = serviceParams {
-            self.parameters = serviceParams
-        }
+        self.parameters = serviceParams
     }
 }
 ```
