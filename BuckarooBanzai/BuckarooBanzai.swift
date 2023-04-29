@@ -60,12 +60,11 @@ open class BuckarooBanzai: NSObject {
     /// 
     /// - Returns: The singleton instance.
     public class func sharedInstance() -> BuckarooBanzai {
-        guard let instance = BuckarooBanzai.instance else {
+        if BuckarooBanzai.instance == nil {
             BuckarooBanzai.instance = BuckarooBanzai()
-            return BuckarooBanzai.instance!
         }
         
-        return instance
+        return instance!
     }
     
     /// Creates a new session running on the dedicated `OperationQueue`
@@ -137,7 +136,7 @@ open class BuckarooBanzai: NSObject {
         
         if let additionalHeaders = service.additionalHeaders {
             for (key,value) in additionalHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
+                request.setValue("\(value)", forHTTPHeaderField: "\(key)")
             }
         }
         

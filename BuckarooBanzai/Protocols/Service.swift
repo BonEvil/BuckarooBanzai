@@ -49,12 +49,12 @@ public protocol Service {
     /// Optional. If included, the parameters will attempt to be serialized with the provided serializer or by the included serializers.
     ///
     /// Currently, only JSON and URL-encoded Form serializers are included.
-    var parameters: [String: Any]? { get }
+    var parameters: [AnyHashable: Any]? { get }
     
     /// Header key/value pairs to be included in the HTTP request.
     ///
     /// Optional. If included, will be added to the `HTTPRequest` headers.
-    var additionalHeaders: [String: String]? { get }
+    var additionalHeaders: [AnyHashable: Any]? { get }
     
     /// Custom serializer for the request body.
     ///
