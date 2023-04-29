@@ -34,7 +34,7 @@ Then you can create a service like the following:
 ```swift
 let service = BaseService(withPath: "/get")
 ```
-BuckarooBanzai is a singleton and uses concurrency. You can then use this service like this:
+BuckarooBanzai is a singleton and uses concurrency. You can then use the `service` like this:
 ```swift
 Task {
     do {
