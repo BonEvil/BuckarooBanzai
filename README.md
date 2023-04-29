@@ -1,7 +1,7 @@
 # BuckarooBanzai
 ### A new way to do networking in Swift. That other one is old AF.
 
-## Introduction
+## Usage
 BuckarooBanzai is based on service calls to API endpoints. As such, BuckarooBanzai has a concept of a `Service` protocol.
 
 The `Service` protocol contains a number of required and optional parameters. Use this protocol to create a concrete struct or class. Here we are creating a base service to use for a specific resource endpoint.
