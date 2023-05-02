@@ -14,8 +14,8 @@ public protocol Service {
     
     /// An HTTP request type.
     ///
-    /// GET, POST, etc. Enumerated as defined in ``HTTPRequestType``.
-    var requestType: HTTPRequestType { get }
+    /// GET, POST, etc. Enumerated as defined in ``HTTPRequestMethod``.
+    var requestMethod: HTTPRequestMethod { get }
     
     /// An HTTP accept type.
     ///

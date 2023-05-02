@@ -131,7 +131,7 @@ open class BuckarooBanzai: NSObject {
     fileprivate func createRequest(_ service: Service) throws -> URLRequest {
         let request = NSMutableURLRequest()
         request.url = URL(string: service.requestURL)
-        request.httpMethod = service.requestType.string()
+        request.httpMethod = service.requestMethod.string()
         request.timeoutInterval = service.timeout
         
         if let additionalHeaders = service.additionalHeaders {

@@ -10,7 +10,7 @@ The `Service` protocol contains a number of required and optional parameters. Us
 import BuckarooBanzai
 
 struct BaseService: Service {
-    var requestType: HTTPRequestType = .GET
+    var requestMethod: HTTPRequestMethod = .GET
     var contentType: HTTPContentType?
     var acceptType: HTTPAcceptType = .JSON
     var timeout: TimeInterval = 10
@@ -73,27 +73,32 @@ do {
 ```
 
 ### Service Properties
-#### requestType
-The `requestType` is a required property that defines the HTTP method to be used for the request. The following are defined:
+#### requestMethod
+The `requestMethod` is a required property that defines the HTTP method to be used for the request. The value for `requestMethod` is an enumeration of type `HTTPRequestMethod`:
 ```swift
 case GET
 case POST
 case PUT
 case DELETE
 case HEAD
+case CONNECT
+case OPTIONS
+case PATCH
+case QUERY
+case TRACE
 case CUSTOM(String)
 ```
 `.CUSTOM` can be used to match a type not listed or to match a custom HTTP method that your server will handle.
 
 #### contentType
-The `contentType` is an optional property that defines what format the body of the request is using. Mainly used for methods other than `.GET`, `.DELETE`, `.HEAD` or any other HTTP method that does not contain any body data. The following are defined:
+The `contentType` is an optional property that defines what format the body of the request is using. Mainly used for methods other than `.GET`, `.DELETE`, `.HEAD` or any other HTTP method that does not contain any body data. The value for `contentType` is an enumeration of type `HTTPContentType`:
 ```swift
 case XML
 case JSON
 case FORM
 case CUSTOM(String)
 ```
-When used, the following is used as the `Content-Type` header entry:
+The following represents the strings that are used as the `Content-Type` header entry:
 ```swift
 case .XML: return "application/xml"
 case .JSON: return "application/json"
@@ -105,6 +110,8 @@ case .CUSTOM(let customType): return customType
 When using `.JSON` or `.FORM`, BuckarooBanzai will automatically serialize the body parameters into the correct format and attach it as the body data.
 
 When using any other type, you must provide a `requestSerializer` conforming to the `RequestSerializer` protocol. (see below for details)
+
+**Note**: This automatic serialization only applies to request methods that will send body data.
 
 #### acceptType
 The `acceptType` is a required property that defines the expected body format returned from the server. The following are defined:
