@@ -101,6 +101,10 @@ case .CUSTOM(let customType): return customType
 ```
 `.CUSTOM` can be used to match a type not listed or to match a custom type your server will return.
 
+When using `.JSON` or `.FORM`, BuckarooBanzai will automatically serialize the body parameters into the correct format and attach it as the body data.
+
+When using any other type, you must provide a `requestSerializer` conforming to the `RequestSerializer` protocol. (see below for details)
+
 #### acceptType
 The `acceptType` is a required property that defines the expected body format returned from the server. The following are defined:
 ```swift
