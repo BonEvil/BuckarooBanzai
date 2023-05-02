@@ -216,7 +216,7 @@ open class BuckarooBanzai: NSObject {
         return ""
     }
     
-    /// Checks to see of the `Service.requestBody` is a `Dictionary<String: Any>` and try to process it if it is.
+    /// Checks to see of the `Service.requestBody` is a `Dictionary<AnyHashable: Any>` and try to process it if it is.
     ///
     /// This method uses the provided serializer if available, otherwise, sends the `parameters` object on to see if it can be parsed by the included serializers.
     ///
