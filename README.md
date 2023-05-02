@@ -22,6 +22,7 @@ struct BaseService: Service {
     var sessionDelegate: URLSessionTaskDelegate?
     var testResponse: HTTPResponse?
 
+    /// create your custom initializer to add or update any properties
     init(withPath path: String, serviceParams: [AnyHashable: Any]? = nil) {
         requestURL = requestURL + path
         self.parameters = serviceParams
