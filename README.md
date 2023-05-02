@@ -124,9 +124,20 @@ case JAVASCRIPT
 case ANY
 case CUSTOM(String)
 ```
-`.CUSTOM` can be used to match the custom type returned from your server.
+The following represents the strings that are expected in the response `Content-Type` header entry:
+```swift
+case .XML: return "application/xml"
+case .JSON: return "application/json"
+case .HTML: return "text/html"
+case .TEXT: return "text/plain"
+case .JAVASCRIPT: return "text/javascript"
+case .ANY: return "*/*"
+case .CUSTOM(let customType): return customType
+```
 
-BuckarooBanzai will check the `acceptType` against the type `Content-Type` returned in the server response header and throw an error if they do not match. With some exceptions.
+`.CUSTOM` can be used to match a custom type to be returned from your server.
+
+BuckarooBanzai will check the `acceptType` against the type `Content-Type` returned in the server response header and throw an error if they do not match with some exceptions.
 
 For example, if the `Service` object defines the `acceptType` as `.JSON`*(application/json)* but the server responds with `Content-Type: application/json;charset=utf-8`, the return type will split the value by colons (;) and only match against the string before the first colon.
 
