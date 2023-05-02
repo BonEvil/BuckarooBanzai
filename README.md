@@ -114,7 +114,7 @@ When using any other type, you must provide a `requestSerializer` conforming to 
 **Note**: This automatic serialization only applies to request methods that will send body data.
 
 #### acceptType
-The `acceptType` is a required property that defines the expected body format returned from the server. The following are defined:
+The `acceptType` is a required property that defines the expected body format returned from the server. The following are an enumeration of type `HTTPAcceptType`:
 ```swift
 case XML
 case JSON
