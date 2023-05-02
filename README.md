@@ -4,7 +4,23 @@
 BuckarooBanzai is based on service calls to specific API endpoints. These calls are encapsulated into objects that make it easy to reuse, modify and test additional resource paths for the same endpoint.
 
 ### Service
-The `Service` protocol contains a number of required and optional parameters. Use this protocol to create a concrete struct or class. Here we are creating a base service to use for a specific resource domain.
+The `Service` protocol contains a number of required and optional parameters.
+```swift
+public protocol Service {
+    var requestMethod: HTTPRequestMethod { get }
+    var acceptType: HTTPAcceptType { get }
+    var timeout: TimeInterval { get }
+    var requestURL: String { get }
+    var contentType: HTTPContentType? { get }
+    var requestBody: Data? { get }
+    var parameters: [AnyHashable: Any]? { get }
+    var additionalHeaders: [AnyHashable: Any]? { get }
+    var requestSerializer: RequestSerializer? { get }
+    var sessionDelegate: URLSessionTaskDelegate? { get }
+    var testResponse: HTTPResponse? { get }
+}
+```
+Use this protocol to create a concrete struct or class. Here we are creating a base service to use for a specific resource domain.
 
 ```swift
 import BuckarooBanzai
