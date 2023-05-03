@@ -54,7 +54,7 @@ BuckarooBanzai is a singleton and uses concurrency. You can then use the `servic
 ```swift
 Task {
     do {
-        let response = try await BuckarooBanzai.sharedInstance().start(service: service)
+        let response = try await BuckarooBanzai.shared.start(service: service)
         /// do something with response
     } catch let error as BBError {
         print("ERROR: \(error)")
@@ -80,7 +80,7 @@ let myObject: MyObject = try response.decodeBodyData()
 Both of these methods throw so you can keep them inline with the `response` object.
 ```swift
 do {
-    let response = try await BuckarooBanzai.sharedInstance().start(service: service)
+    let response = try await BuckarooBanzai.shared.start(service: service)
     let webImage = try response.decodeBodyDataAsImage()
     /// do something with image
 } catch {

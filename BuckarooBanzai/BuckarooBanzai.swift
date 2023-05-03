@@ -16,7 +16,9 @@ import Foundation
 open class BuckarooBanzai: NSObject {
     
     /// Singleton instance
-    fileprivate static var instance: BuckarooBanzai?
+    public static var shared: BuckarooBanzai = {
+       return BuckarooBanzai()
+    }()
     
     /// Domain for errors thrown in ``BuckarooBanzai``
     static let errorDomain = "BuckarooBanzaiErrorDomain"
@@ -54,17 +56,6 @@ open class BuckarooBanzai: NSObject {
     private override init() {
         super.init()
         createSession()
-    }
-
-    /// Creates the BuckarooBanzai shared instance
-    /// 
-    /// - Returns: The singleton instance.
-    public class func sharedInstance() -> BuckarooBanzai {
-        if BuckarooBanzai.instance == nil {
-            BuckarooBanzai.instance = BuckarooBanzai()
-        }
-        
-        return instance!
     }
     
     /// Creates a new session running on the dedicated `OperationQueue`

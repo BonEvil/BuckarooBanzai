@@ -12,7 +12,7 @@ import Foundation
 /// They allow you to package up everything you need to call a service.
 public protocol Service {
     
-    /// An HTTP request type.
+    /// An HTTP request method.
     ///
     /// GET, POST, etc. Enumerated as defined in ``HTTPRequestMethod``.
     var requestMethod: HTTPRequestMethod { get }
