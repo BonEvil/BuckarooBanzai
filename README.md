@@ -50,13 +50,13 @@ Then you can create a service like the following:
 let service = BaseService(withPath: "/get")
 ```
 ### BuckarooBanzai
-BuckarooBanzai is a singleton and uses concurrency. You can then use the `service` like this:
+BuckarooBanzai is a singleton and uses async/await. You can then use the `service` like this:
 ```swift
 Task {
     do {
         let response = try await BuckarooBanzai.shared.start(service: service)
         /// do something with response
-    } catch let error as BBError {
+    } catch {
         print("ERROR: \(error)")
     }
 }
