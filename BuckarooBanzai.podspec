@@ -3,7 +3,7 @@ Pod::Spec.new do |spec|
   # ―――  Spec Metadata  ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   
   spec.name         = "BuckarooBanzai"
-  spec.version      = "0.5.0"
+  spec.version      = "0.5.1"
   spec.summary      = "A new way to do networking in Swift. That other one is old AF."
 
   
