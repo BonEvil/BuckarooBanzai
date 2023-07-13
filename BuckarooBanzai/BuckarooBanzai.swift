@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 /// The main object for calling network services.
 ///
@@ -97,6 +98,76 @@ open class BuckarooBanzai: NSObject {
         return response
     }
     
+    /// Creates a publisher for a generic Decodable type
+    /// - Parameter service: The configured service object.
+    /// - Returns: A Publisher that returns a Decodable Generic as the output or an `Error`.
+    public func startDecodablePublisher<T: Decodable>(service: Service) -> AnyPublisher<T, Error> {
+        if let testResponse = service.testResponse, let body = testResponse.body {
+            return Just(body)
+                .decode(type: T.self, decoder: JSONDecoder())
+                .mapError { error in
+                    return error
+                }
+                .eraseToAnyPublisher()
+        }
+        
+        do {
+            let request = try createRequest(service)
+            return session.dataTaskPublisher(for: request)
+                .tryMap({ (data: Data, response: URLResponse) in
+                    do {
+                        let _ = try self.doValidationForUrlResponse(response, andAcceptType: service.acceptType.string(), withData: data)
+                    } catch {
+                        throw error
+                    }
+                    
+                    return data
+                })
+                .decode(type: T.self, decoder: JSONDecoder())
+                .eraseToAnyPublisher()
+        } catch {
+            return AnyPublisher(
+                Fail<T, Error>(error: error)
+            )
+        }
+    }
+    
+    /// Creates a publisher for a `HTTPResponse` type
+    /// - Parameter service: The configured service object.
+    /// - Returns: A Publisher that returns a `HTTPResponse` as the output or an `Error`.
+    public func startHttpResponsePublisher(service: Service) -> AnyPublisher<HTTPResponse, Error> {
+        if let testResponse = service.testResponse {
+            do {
+                let response = try doTestResponse(testResponse, withAcceptType: service.acceptType)
+                return Result.Publisher(response).eraseToAnyPublisher()
+            } catch {
+                return AnyPublisher(
+                    Fail<HTTPResponse, Error>(error: error)
+                )
+            }
+        }
+        
+        var request: URLRequest
+        do {
+            request = try createRequest(service)
+        } catch {
+            return AnyPublisher(
+                Fail<HTTPResponse, Error>(error: error)
+            )
+        }
+
+        return session.dataTaskPublisher(for: request)
+            .tryMap { [unowned self] (data: Data, response: URLResponse) in
+                do {
+                    let httpResponse = try self.doValidationForUrlResponse(response, andAcceptType: service.acceptType.string(), withData: data)
+                    return httpResponse
+                } catch {
+                    throw error
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
     /// Off-network testing
     ///
     /// If a ``Service/testResponse`` is set in the ``Service`` object, an off-network process is run to validate and return the ``HTTPResponse`` provided,
@@ -155,19 +226,28 @@ open class BuckarooBanzai: NSObject {
     fileprivate func sendRequest(_ request: URLRequest, forService service: Service) async throws -> HTTPResponse {
         let (data, response) = try await session.data(for: request, delegate: service.sessionDelegate)
         
+        do {
+            let httpResponse = try self.doValidationForUrlResponse(response, andAcceptType: service.acceptType.string(), withData: data)
+            return httpResponse
+        } catch {
+            throw error
+        }
+    }
+    
+    fileprivate func doValidationForUrlResponse(_ response: URLResponse, andAcceptType acceptType: String, withData data: Data) throws -> HTTPResponse {
         guard let httpUrlResponse = response as? HTTPURLResponse else {
-            throw BBError.general([NSLocalizedDescriptionKey : "Invalid response."])
+            throw BBError.general([NSLocalizedDescriptionKey: "Invalid HTTPURLResponse"])
         }
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
         let statusCode = httpUrlResponse.statusCode
+        let receivedContentType = contentType(fromHeaders: allHeaderFields)
         let httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data)
-        let receivedContentType = self.contentType(fromHeaders: allHeaderFields)
-        let acceptType = service.acceptType.string()
         
         do {
             try checkStatusCode(statusCode)
             try checkContentType(receivedContentType, forAcceptType: acceptType)
+            
             return httpResponse
         } catch let error as BBError {
             var additionalInfo: [String: Any] = [BuckarooBanzai.BBHTTPResponseErrorKey: httpResponse]
