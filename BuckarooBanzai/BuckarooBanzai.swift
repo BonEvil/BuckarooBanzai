@@ -106,7 +106,8 @@ open class BuckarooBanzai: NSObject {
             return Just(body)
                 .decode(type: T.self, decoder: JSONDecoder())
                 .mapError { error in
-                    return error
+                    let bbError = BBError.decoder([NSLocalizedDescriptionKey: error.localizedDescription])
+                    return bbError
                 }
                 .eraseToAnyPublisher()
         }
