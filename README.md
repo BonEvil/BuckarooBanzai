@@ -157,4 +157,4 @@ BuckarooBanzai will check the `acceptType` against the type `Content-Type` retur
 
 For example, if the `Service` object defines the `acceptType` as `.JSON`*(application/json)* but the server responds with `Content-Type: application/json;charset=utf-8`, the return type will split the value by semi-colons (;) and only match against the string before the first semi-colon.
 
-## … *work-in-progress*
+## … *more to come*
