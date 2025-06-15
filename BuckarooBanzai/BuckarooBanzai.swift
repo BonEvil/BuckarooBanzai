@@ -258,7 +258,7 @@ open class BuckarooBanzai: NSObject {
             additionalInfo.merge(userInfo) { (current, _) in
                 current
             }
-            throw error.updateUserInfoWith(userInfo: userInfo)
+            throw error.updateUserInfoWith(userInfo: additionalInfo)
         }
     }
     
