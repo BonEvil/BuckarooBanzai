@@ -4,8 +4,11 @@
 //
 //  Created by Daniel Person on 4/26/23.
 //
+import Foundation
 
+#if canImport(UIKit)
 import UIKit
+#endif
 
 extension HTTPResponse {
 
@@ -29,6 +32,7 @@ extension HTTPResponse {
         return object
     }
     
+#if canImport(UIKit)
     /// A convenience method to do simple decoding of image data returned from the service.
     ///
     /// This method is convenient when downloading image assets.
@@ -44,7 +48,8 @@ extension HTTPResponse {
         guard let image = UIImage(data: data) else {
             throw BBError.decoder([NSLocalizedDescriptionKey: "Could not create image from data."])
         }
-        
+
         return image
     }
+#endif
 }

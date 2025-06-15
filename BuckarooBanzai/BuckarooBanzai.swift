@@ -6,7 +6,12 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+#if canImport(Combine)
 import Combine
+#endif
 
 /// The main object for calling network services.
 ///
@@ -52,7 +57,7 @@ open class BuckarooBanzai: NSObject {
     }()
     
     /// The dedicated session used for network calls
-    fileprivate var session: Foundation.URLSession!
+    fileprivate var session: URLSession!
     
     private override init() {
         super.init()
@@ -98,6 +103,7 @@ open class BuckarooBanzai: NSObject {
         return response
     }
     
+#if canImport(Combine)
     /// Creates a publisher for a generic Decodable type
     /// - Parameter service: The configured service object.
     /// - Returns: A Publisher that returns a Decodable Generic as the output or an `Error`.
@@ -132,7 +138,9 @@ open class BuckarooBanzai: NSObject {
             )
         }
     }
+#endif
     
+#if canImport(Combine)
     /// Creates a publisher for a `HTTPResponse` type
     /// - Parameter service: The configured service object.
     /// - Returns: A Publisher that returns a `HTTPResponse` as the output or an `Error`.
@@ -168,6 +176,7 @@ open class BuckarooBanzai: NSObject {
             }
             .eraseToAnyPublisher()
     }
+#endif
     
     /// Off-network testing
     ///
@@ -192,8 +201,10 @@ open class BuckarooBanzai: NSObject {
     }
     
     fileprivate func createRequest(_ service: Service) throws -> URLRequest {
-        let request = NSMutableURLRequest()
-        request.url = URL(string: service.requestURL)
+        guard let url = URL(string: service.requestURL) else {
+            throw BBError.general([NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = service.requestMethod.string()
         request.timeoutInterval = service.timeout
         
@@ -211,14 +222,14 @@ open class BuckarooBanzai: NSObject {
         /// If the service already has the request body as `Data`, just add it to the request and return
         if let body = service.requestBody {
             request.httpBody = body
-            return request as URLRequest
+            return request
         }
         
         /// Try to serialize the the request parameters to form the `request.httpBody` `Data`
         do {
             let data = try serializeRequest(forService: service)
             request.httpBody = data
-            return request as URLRequest
+            return request
         } catch let error as BBError {
             throw error
         }
