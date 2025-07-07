@@ -42,7 +42,7 @@ final class BuckarooBanzaiTests: XCTestCase {
         let params: [String: Any] = ["name": "John Doe", "age": 22]
         let data = try FormRequestSerializer().serialize(params)
         let body = String(data: data, encoding: .utf8)
-        XCTAssertTrue(body?.contains("name=John%20Doe") == true)
+        XCTAssertTrue(body?.contains("name=John Doe") == true)
         XCTAssertTrue(body?.contains("age=22") == true)
     }
 

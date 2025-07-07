@@ -16,7 +16,7 @@ struct JSONRequestSerializer: RequestSerializer {
         }
         
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: object, options: JSONSerialization.WritingOptions.prettyPrinted)
+            let jsonData = try JSONSerialization.data(withJSONObject: object, options: [])
             return jsonData
         } catch let error as NSError {
             throw BBError.serializer(error.userInfo)

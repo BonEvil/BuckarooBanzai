@@ -253,8 +253,8 @@ open class BuckarooBanzai: NSObject {
         
         let allHeaderFields = httpUrlResponse.allHeaderFields
         let statusCode = httpUrlResponse.statusCode
-        let receivedContentType = contentType(fromHeaders: allHeaderFields)
         let httpResponse = HTTPResponse(statusCode: statusCode, headers: allHeaderFields, body: data)
+        let receivedContentType = contentType(fromHeaders: allHeaderFields)
         
         do {
             try checkStatusCode(statusCode)
@@ -269,7 +269,7 @@ open class BuckarooBanzai: NSObject {
             additionalInfo.merge(userInfo) { (current, _) in
                 current
             }
-            throw error.updateUserInfoWith(userInfo: userInfo)
+            throw error.updateUserInfoWith(userInfo: additionalInfo)
         }
     }
     
