@@ -9,7 +9,7 @@ import Foundation
 
 struct FormRequestSerializer: RequestSerializer {
     
-    var customCharacterSet:CharacterSet {
+    private static let customCharacterSet: CharacterSet = {
         var charSet = NSCharacterSet.urlQueryAllowed
         let remove = "+&"
         for char in remove.unicodeScalars {
@@ -17,7 +17,7 @@ struct FormRequestSerializer: RequestSerializer {
         }
         
         return charSet
-    }
+    }()
     
     func serialize(_ object: Any) throws -> Data {
         
@@ -25,25 +25,24 @@ struct FormRequestSerializer: RequestSerializer {
             throw BBError.serializer([NSLocalizedDescriptionKey: "Params should be in a one-level Dictionary<String,Any>"])
         }
 
-        var body = ""
-        
-        for (key,value) in params {
-            let encodedKey = urlEncode(key)
-            let encodedValue = urlEncode("\(value)")
-            body += encodedKey+"="+encodedValue+"&"
+        var components = URLComponents()
+        components.queryItems = params.map { key, value in
+            URLQueryItem(name: key, value: String(describing: value))
         }
         
-        body = String(body.dropLast())
-        
-        if let formData = body.data(using: String.Encoding.utf8) {
-            return formData
-        } else {
-            throw BBError.serializer([NSLocalizedDescriptionKey: "Could not convert string params to Data."])
+        guard let query = components.query else {
+            throw BBError.serializer([NSLocalizedDescriptionKey: "Could not create URL query from parameters."])
         }
+        
+        guard let formData = query.data(using: .utf8) else {
+            throw BBError.serializer([NSLocalizedDescriptionKey: "Could not convert query string to Data."])
+        }
+        
+        return formData
     }
     
-    func urlEncode(_ string:String) -> String {
-        guard let encoded = string.addingPercentEncoding(withAllowedCharacters: customCharacterSet) else {
+    private func urlEncode(_ string: String) -> String {
+        guard let encoded = string.addingPercentEncoding(withAllowedCharacters: Self.customCharacterSet) else {
             return string
         }
         
